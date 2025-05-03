@@ -8,46 +8,84 @@
     body {
       font-family: Arial, sans-serif;
       background-color: #f7f7f7;
-      text-align: center;
       margin: 0;
       padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
     }
     .container {
-      max-width: 1024px;
-      margin: auto;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+      max-width: 1200px;
+      width: 100%;
       background: #ffffff;
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-      margin-bottom: 20px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    td {
+      padding: 8px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
     }
     input {
-      width: 100px;
+      width: 100%;
       padding: 5px;
       margin-top: 5px;
     }
     canvas {
       border: 1px solid #ccc;
       background-color: #fff;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Rebar Layout Visualizer</h1>
-    <form id="inputForm">
-      <label>Main Rebar (in): <input type="number" step="0.1" id="circleDiameter" value="2"/></label>
-      <label>Rebar Spacing (in): <input type="number" step="0.1" id="spacing" value="4"/></label>
-      <label>Clear Cover (in): <input type="number" step="0.1" id="offsetY" value="3"/></label>
-      <label>Tie Rebar (in): <input type="number" step="0.1" id="tieRebarWidth" value="0.2"/></label>
-      <label>Section Thickness (in): <input type="number" step="0.1" id="rectWidth" value="6"/></label>
-    </form>
-    <canvas id="layoutCanvas" width="1000" height="600"></canvas>
+    <!-- Inputs Section -->
+    <div>
+      <h1>Rebar Layout Visualizer</h1>
+      <form id="inputForm">
+        <table>
+          <tr>
+            <td><label for="circleDiameter">Main Rebar (in):</label></td>
+            <td><input type="number" step="0.1" id="circleDiameter" value="2" /></td>
+          </tr>
+          <tr>
+            <td><label for="spacing">Rebar Spacing (in):</label></td>
+            <td><input type="number" step="0.1" id="spacing" value="4" /></td>
+          </tr>
+          <tr>
+            <td><label for="offsetY">Clear Cover (in):</label></td>
+            <td><input type="number" step="0.1" id="offsetY" value="3" /></td>
+          </tr>
+          <tr>
+            <td><label for="tieRebarWidth">Tie Rebar (in):</label></td>
+            <td><input type="number" step="0.1" id="tieRebarWidth" value="0.2" /></td>
+          </tr>
+          <tr>
+            <td><label for="rectWidth">Section Thickness (in):</label></td>
+            <td><input type="number" step="0.1" id="rectWidth" value="6" /></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+
+    <!-- Canvas Section -->
+    <div>
+      <canvas id="layoutCanvas" width="1000" height="600"></canvas>
+    </div>
   </div>
 
   <script>
