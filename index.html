@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input and Plot Layout</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Left side: Table of inputs */
+        .input-container {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .input-box {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .input-box label {
+            font-weight: bold;
+            width: 60%;
+        }
+
+        .input-box input {
+            width: 35%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .input-box input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        /* Right side: Plot */
+        .plot-container {
+            width: 45%;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Left side: Input form -->
+    <div class="input-container">
+        <div class="input-box">
+            <label for="section-thickness">Section Thickness (inches)</label>
+            <input type="number" id="section-thickness" value="2">
+        </div>
+        <div class="input-box">
+            <label for="clear-cover">Clear Cover (inches)</label>
+            <input type="number" id="clear-cover" value="1">
+        </div>
+        <div class="input-box">
+            <label for="tie-rebar">Tie Rebar (inches)</label>
+            <input type="number" id="tie-rebar" value="0.5">
+        </div>
+        <div class="input-box">
+            <label for="main-rebar">Main Rebar (inches)</label>
+            <input type="number" id="main-rebar" value="0.75">
+        </div>
+    </div>
+
+    <!-- Right side: Plot -->
+    <div class="plot-container">
+        <canvas id="plotCanvas"></canvas>
+    </div>
+
+    <script>
+        // Get the canvas element and context
+        const canvas = document.getElementById('plotCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size to 10 inches by 10 inches at 100 pixels per inch (100 px/inch)
+        const inchesToPixels = 100;
+        const canvasWidthInches = 10;
+        const canvasHeightInches = 10;
+        canvas.width = canvasWidthInches * inchesToPixels;
+        canvas.height = canvasHeightInches * inchesToPixels;
+
+        // Initial values for inputs (in inches)
+        let sectionThickness = 2; // inches
+        let clearCover = 1; // inches
+        let tieRebar = 0.5; // inches
+        let mainRebar = 0.75; // inches
+
+        // Function to draw the grid
+        function drawGrid() {
+            const gridSize = inchesToPixels;
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 0.5;
+
+            for (let x = 0; x <= canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y <= canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        // Function to update the plot
+        function updatePlot() {
+            // Clear the canvas before drawing
+            ctx.clearRect(
