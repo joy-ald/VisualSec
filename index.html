@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rebar Layout Visualizer</title>
+  <title>Single Reinforced Continous Section</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,7 +17,7 @@
     }
     .container {
       display: grid;
-      grid-template-columns: 1fr 2fr;
+      grid-template-columns: 280px 1fr;
       gap: 20px;
       max-width: 1200px;
       width: 100%;
@@ -38,16 +38,17 @@
       display: block;
       margin-bottom: 5px;
     }
-    input {
+    input, select {
       width: 100%;
+      max-width: 120px;
       padding: 5px;
       margin-top: 5px;
     }
     canvas {
       border: 1px solid #ccc;
       background-color: #fff;
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      height: auto;
     }
   </style>
 </head>
@@ -55,29 +56,68 @@
   <div class="container">
     <!-- Inputs Section -->
     <div>
-      <h1>Rebar Layout Visualizer</h1>
+      <h1>Single Reinforced Continous Section</h1>
       <form id="inputForm">
         <table>
-          <tr>
-            <td><label for="circleDiameter">Main Rebar (in):</label></td>
-            <td><input type="number" step="0.1" id="circleDiameter" value="2" /></td>
-          </tr>
-          <tr>
-            <td><label for="spacing">Rebar Spacing (in):</label></td>
-            <td><input type="number" step="0.1" id="spacing" value="4" /></td>
-          </tr>
-          <tr>
-            <td><label for="offsetY">Clear Cover (in):</label></td>
-            <td><input type="number" step="0.1" id="offsetY" value="3" /></td>
-          </tr>
-          <tr>
-            <td><label for="tieRebarWidth">Tie Rebar (in):</label></td>
-            <td><input type="number" step="0.1" id="tieRebarWidth" value="0.2" /></td>
-          </tr>
-          <tr>
+
+<tr>
+  <td><label for="fc">Concrete Strength f'c (ksi):</label></td>
+  <td><input type="number" step="100" id="fc" value="3" /></td>
+</tr>
+
+	  <tr>
             <td><label for="rectWidth">Section Thickness (in):</label></td>
             <td><input type="number" step="0.1" id="rectWidth" value="6" /></td>
           </tr>
+
+          <tr>
+            <td><label for="mainRebar">Main Rebar:</label></td>
+            <td>
+              <select id="mainRebar">
+                <option value="0.375">#3</option>
+                <option value="0.5" selected>#4</option>
+                <option value="0.625">#5</option>
+                <option value="0.75">#6</option>
+                <option value="0.875">#7</option>
+                <option value="1.0">#8</option>
+                <option value="1.128">#9</option>
+                <option value="1.27">#10</option>
+                <option value="1.41">#11</option>
+                <option value="1.693">#14</option>
+                <option value="2.255">#18</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td><label for="spacing">Rebar Spacing (in):</label></td>
+            <td><input type="number" step="0.1" id="spacing" value="6" /></td>
+          </tr>
+          
+
+          <tr>
+            <td><label for="tieRebar">Tie Rebar:</label></td>
+            <td>
+              <select id="tieRebar">
+                <option value="0.375">#3</option>
+                <option value="0.5" selected>#4</option>
+                <option value="0.625">#5</option>
+                <option value="0.75">#6</option>
+                <option value="0.875">#7</option>
+                <option value="1.0">#8</option>
+                <option value="1.128">#9</option>
+                <option value="1.27">#10</option>
+                <option value="1.41">#11</option>
+                <option value="1.693">#14</option>
+                <option value="2.255">#18</option>
+              </select>
+            </td>
+          </tr>
+
+          <tr>
+            <td><label for="offsetY">Clear Cover (in):</label></td>
+            <td><input type="number" step="0.1" id="offsetY" value="1.5" /></td>
+          </tr>
+
         </table>
       </form>
     </div>
@@ -99,12 +139,11 @@
     window.addEventListener("load", drawLayout);
 
     function drawLayout() {
-      const circleDia = parseFloat(document.getElementById('circleDiameter').value);
+      const circleDia = parseFloat(document.getElementById('mainRebar').value);
       const spacing = parseFloat(document.getElementById('spacing').value);
       const offsetY = parseFloat(document.getElementById('offsetY').value);
-      const tieRebarWidth = parseFloat(document.getElementById('tieRebarWidth').value);
+      const tieRebarWidth = parseFloat(document.getElementById('tieRebar').value);
       const rectWidth = parseFloat(document.getElementById('rectWidth').value);
-
       if (isNaN(circleDia) || isNaN(spacing) || isNaN(offsetY) || isNaN(tieRebarWidth) || isNaN(rectWidth)) {
         return;
       }
@@ -126,12 +165,10 @@
       ctx.lineWidth = 2;
       ctx.strokeRect(rectX, rectY, pxRectLength, pxRectWidth);
 
-      const centerY = rectY + pxOffsetY;
+      const centerY = pxRectWidth +INCH_TO_PX -pxOffsetY-pxRebarHeight-pxCircleDia / 2;
       const usableWidth = pxRectLength;
 
-      // Determine how many full circles can fit
       const count = Math.floor((usableWidth - pxCircleDia) / pxSpacing) + 1;
-
       const startX = rectX + (usableWidth - ((count - 1) * pxSpacing)) / 2;
 
       ctx.strokeStyle = "#007BFF";
@@ -147,20 +184,31 @@
         circleCenters.push(x);
       }
 
-      // Tie rebar: top edge above circles, bottom edge tangent to all circles
-      const tangentY = centerY - pxCircleDia / 2;
-      const rebarTopY = tangentY - pxRebarHeight;
+      const tangentY = centerY + pxCircleDia / 2;
+      const rebarTopY = tangentY;
 
       ctx.fillStyle = "#FF0000";
       ctx.fillRect(rectX, rebarTopY, pxRectLength, pxRebarHeight);
 
       // Annotations: Rightmost circle
-      const lastCircleX = circleCenters[circleCenters.length - 1];
+      const rebarAreas = {
+  '#3': 0.1108,
+  '#4': 0.1963,
+  '#5': 0.3040,
+  '#6': 0.4418,
+  '#7': 0.6013,
+  '#8': 0.7854,
+  '#9': 1.0025,
+  '#10': 1.2732,
+  '#11': 1.5708,
+  '#14': 2.2617,
+  '#18': 3.9778
+};
 
-      // Arrow pointing to circle
-      const arrowTailX = lastCircleX + 80;
+const lastCircleX = circleCenters[circleCenters.length - 1];
+
+      const arrowTailX = pxRectLength + INCH_TO_PX*3;
       const arrowHeadX = lastCircleX + pxCircleDia / 2;
-
       const textY = centerY;
 
       ctx.strokeStyle = "#000";
@@ -170,7 +218,6 @@
       ctx.lineTo(arrowHeadX, textY);
       ctx.stroke();
 
-      // Arrowhead
       ctx.beginPath();
       ctx.moveTo(arrowHeadX, textY - 5);
       ctx.lineTo(arrowHeadX, textY + 5);
@@ -179,25 +226,75 @@
       ctx.fillStyle = "#000";
       ctx.fill();
 
-      // Text Labels
       ctx.fillStyle = "#000";
-      ctx.font = "14px Arial";
+      ctx.font = "18px Arial";
       ctx.textAlign = "left";
-      ctx.fillText(`#${circleDia}`, arrowTailX + 5, textY - 5); // Main rebar
-      ctx.fillText(`Tie Rebar: ${tieRebarWidth}"`, arrowTailX + 5, textY - 25); // Tie rebar above
+
+      const mainRebarSelect = document.getElementById('mainRebar');
+const mainRebarLabel = mainRebarSelect.options[mainRebarSelect.selectedIndex].text;
+const rebarArea = rebarAreas[mainRebarLabel];  // Get the area for the selected rebar
+const spacingFeet = spacing / 12;  // Convert spacing to feet
+const As = rebarArea / spacingFeet;  // Calculate As
+// Constants
+const fy = 60; // ksi
+const b = 12;     // in
+// Get fc from input
+const fc = parseFloat(document.getElementById('fc').value);
+if (isNaN(fc) || fc <= 0) return;  // Avoid invalid input
+
+// Compute beta1,c, a, d, and M
+
+let beta1;
+if (fc > 4) {
+    beta1 = 0.85 - 0.05 * (fc - 4);
+    beta1 = Math.max(beta1, 0.65);  // ACI limit: not less than 0.65
+} else {
+    beta1 = 0.85;
+}
+
+
+const c = (As * fy) / (0.85 * fc * b);
+const a = beta1 * c;
+const d = rectWidth-offsetY-tieRebarWidth - circleDia/2;  // effective depth from compression face to centroid of tension steel
+const M = 0.9*As * fy * (d - a / 2);  // Moment in in-k
+const Mkipsft = M  / 12; // ft-kips
+
+ctx.fillStyle = "#000";
+      ctx.font = "18px Arial";
+      ctx.textAlign = "left";
+
+ctx.fillText(`Main Rebar: ${mainRebarLabel}` , arrowTailX + 5, textY - 5);
+ctx.fillText(`As: ${As.toFixed(2)} in²/ft`, arrowTailX + 5, textY + 10);
+
+      const tieRebarSelect = document.getElementById('tieRebar');
+	const tieRebarLabel = tieRebarSelect.options[tieRebarSelect.selectedIndex].text;
+	ctx.fillText(`Tie Rebar: ${tieRebarLabel}` , arrowTailX + 5, textY - 25);
+
+      ctx.fillText(`Section: ${rectWidth}" thick`, arrowTailX + 5, textY - 45);
+ctx.fillText(`phi.Mn=0.9*As*fy*(d-a/2)`, arrowTailX + 5, textY + 30);
+ctx.fillText(`phi.Mn= ${Mkipsft.toFixed(2)} kip-ft`, arrowTailX + 5, textY + 50);
+
+ctx.fillText(`d: ${d.toFixed(2)} " (effective depth)`, arrowTailX + 5, textY + 90);
+ctx.fillText(`c: ${c.toFixed(2)} " (neutral axis depth)`, arrowTailX + 5, textY + 110);
+ctx.fillText(`a: ${a.toFixed(2)} " (stress block)`, arrowTailX + 5, textY + 130);
+ctx.fillText(`f'c: ${fc} ksi`, arrowTailX + 5, textY + 150);
+ctx.fillText(`fy: ${fy} ksi`, arrowTailX + 5, textY + 170);
+ctx.fillText(`beta: ${beta1.toFixed(2)} `, arrowTailX + 5, textY + 190);
+
+ctx.fillText(`Reference: ACI-318-14`, arrowTailX + 5, textY + 210);
+
+
     }
 
     function drawGrid(width, height, spacing) {
       ctx.strokeStyle = "#e0e0e0";
       ctx.lineWidth = 1;
-
       for (let x = 0; x < width; x += spacing) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, height);
         ctx.stroke();
       }
-
       for (let y = 0; y < height; y += spacing) {
         ctx.beginPath();
         ctx.moveTo(0, y);
